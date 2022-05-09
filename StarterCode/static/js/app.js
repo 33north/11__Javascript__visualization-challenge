@@ -3,98 +3,113 @@ filepath = "../data/samples.json";
 
 // Console log check to see promise and json data
 const bioData = d3.json(filepath);
-console.log("Data Promise: ", bioData);
 
-// Testing the bioData promise function
-bioData.then(function(data) {
-    // console.log(data);
-    let name = data.names;
-    let metadata = data.metadata;
-    // for (let i = 0; i < name.length; i++) {
-    //     console.log(name[i]);
-    // };
-    // for (let i = 0; i < metadata.length; i++) {
-    //     console.log(metadata[i])
-    // };
-});
-
-// Initializes the page with a default plot
 function init() {
-  let selector = d3.select("#selDataset");
-
-  console.log(selector)
-
-  bioData.then(function(data) {
-    // console.log(data);
-    let name = data.names;
-    name.forEach(function(num) {
-      selector.append("option").text(num).property("Name", num);
-    });
-    let beginValue = name[0];
-  });
+  selDataset();
+  sampleMetadata();
 };
 
 init();
 
+// On change to the DOM, call getData()
+d3.select("#selDataset").on("change", selDataset);
 
-// function displayData(jsonFile) {
-//     jsonElement = jsonFile.names
-//     for (let i = 0; i < jsonElement.length; i++) {
-//         console.log(jsonElement[i])
-//     }
-//     // let data = [{
-//     //     sample_values: ,
-//     //     otu_ids: ,
-//     //     otu_labels: 
-//     //     values: ,
-//     //     labels: ,
-//     //     type: "bar"
-//     // }];
+// Function called by DOM changes
+function selDataset() {
+  // Select selDataset id in html file
+  let dropdownMenu = d3.select("#selDataset");
 
-//     // let layout = {
-//     //     height: 600,
-//     //     width: 800
-//     // };
+  // Getting data for the dropdown menu
+  bioData.then(function(data) {
+    let name = data.names;
+    let dataset = dropdownMenu.property("value");
+    name.forEach(function(num) {
+      dropdownMenu.append("option").text(num);
+    });
 
-//     // Plotly.newPlot("bar", data, layout);
+    console.log(name[0]);
+    let startValue = name[0];
+    console.log(startValue);
+    sampleMetadata(startValue);
+
+  });
+
+};
+
+function sampleMetadata(value) {
+  // Select sample-metadata in html file
+  let demobox = d3.select("#sample-metadata");
+  demobox.text("");
+
+
+  bioData.then(function(data) {
+    let metadata = data.metadata;
+    // console.log(metadata[0]);
+
+    let metadataKey;
+    for (let metadataObject of metadata) {
+      // demobox.append("description").text(metadata[i])
+      // console.log(metadata[i])
+      if (metadataObject.id == value) {
+        metadataKey = metadataObject;
+        console.log(metadataKey);
+        break;
+      };
+    };
+
+    let displayText;
+    for (let object in metadataKey) {
+      displayText = object + ": " + metadataKey[object] + "\n";
+      demobox.append("p").text(displayText);
+    };
+    
+  });
+
+  
+
+
+};
+
+// function charts(value) {
+//   bioData.then(function(data) {
+//     let sample = data.samples;
+//     let sampleData;
+//     for (let sampleObj of sample) {
+//       if (sampleObj.id == value) {
+//         sampleData = sampleObj;
+//         break
+//       };
+//     };
+
+//     let otu_sample_values = sampleData.sample_values.slice(0, 10);
+//     let otu_ids = sampleData.otu_ids.slice(0, 10);
+
+//     for (let i; i < otu_ids.length(); i++) {
+//       otu_ids[i] = "OTU" + otu_ids[i].toString();
+//     };
+    
+//     let otu_labels = sampleData.otu_labels.slice(0, 10);
+
+//     let barData = [{
+//       x: otu_sample_values,
+//       y: otu_ids,
+//       type: "bar",
+//       orientation: "h",
+//       text: otu_labels
+//     }];
+
+//     let layout = {
+//       yaxis: {
+//         autorange: "reversed"
+//       }
+//     };
+
+//     Plotly.newPlot("bar", barData, layout);
+
+//   });
 // };
 
-
-// function getSampleData(data) {
-//     let dropdownMenu = d3.select("#selDataset");
-//     let dataset = dropdownMenu.property("value");
-//     let data = [];
-
-//     if (dataset == "") {
-//         data = 
-//     }
-// }
-  
-  // // Call updatePlotly() when a change takes place to the DOM
-  // d3.selectAll("#selDataset").on("change", updatePlotly);
-  
-  // // This function is called when a dropdown menu item is selected
-  // function updatePlotly() {
-  //   // Use D3 to select the dropdown menu
-  //   var dropdownMenu = d3.select("#selDataset");
-  //   // Assign the value of the dropdown menu option to a variable
-  //   var dataset = dropdownMenu.property("value");
-  
-  //   // Initialize x and y arrays
-  //   var x = [];
-  //   var y = [];
-  
-  //   if (dataset === 'dataset1') {
-  //     x = [1, 2, 3, 4, 5];
-  //     y = [1, 2, 4, 8, 16];
-  //   }
-  
-  //   else if (dataset === 'dataset2') {
-  //     x = [10, 20, 30, 40, 50];
-  //     y = [1, 10, 100, 1000, 10000];
-  //   }
-  
-  //   // Note the extra brackets around 'x' and 'y'
-  //   Plotly.restyle("plot", "x", [x]);
-  //   Plotly.restyle("plot", "y", [y]);
-  // }
+// Updates the function on dropdown menu change
+function optionChanged(value) {
+  sampleMetadata(value);
+};
